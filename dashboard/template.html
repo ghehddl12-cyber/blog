@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프로젝트 플랫폼 대시보드</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-2:      #f4f3ef;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --rule:           #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --gh:             #2a78d6;
+    --sb:             #1baf7a;
+    --vc:             #4a3aa7;
+    --etc:            #898781;
+    --ok:             #0ca30c;
+    --warn-ink:       #8a5c08;
+    --warn-bg:        #fdf0d0;
+    --sev-ink:        #a44a22;
+    --sev-bg:         #fbe3d8;
+    --off-bg:         #eeede8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --surface-2:      #232322;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --rule:           #383835;
+      --border:         rgba(255,255,255,0.10);
+      --gh:             #3987e5;
+      --sb:             #199e70;
+      --vc:             #9085e9;
+      --etc:            #898781;
+      --ok:             #0ca30c;
+      --warn-ink:       #fab219;
+      --warn-bg:        #3a2c0c;
+      --sev-ink:        #ec835a;
+      --sev-bg:         #3d2317;
+      --off-bg:         #262625;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-2:      #232322;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --rule:           #383835;
+    --border:         rgba(255,255,255,0.10);
+    --gh:             #3987e5;
+    --sb:             #199e70;
+    --vc:             #9085e9;
+    --etc:            #898781;
+    --ok:             #0ca30c;
+    --warn-ink:       #fab219;
+    --warn-bg:        #3a2c0c;
+    --sev-ink:        #ec835a;
+    --sev-bg:         #3d2317;
+    --off-bg:         #262625;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 36px 20px 72px; }
+
+  /* ---------- header ---------- */
+  .title-row { display:flex; align-items:center; gap:12px; flex-wrap: wrap; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  .sync-badge { display:inline-flex; align-items:center; gap:5px; font-size: 12px; font-weight:600;
+    color: var(--ok); background: color-mix(in srgb, var(--ok) 13%, transparent); border-radius: 999px; padding: 4px 11px; }
+  .meta { color: var(--text-muted); font-size: 12.5px; margin-top: 8px; }
+  .meta code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11.5px;
+    background: var(--surface-2); padding: 2px 6px; border-radius: 4px; }
+  .headline-rule { height: 1px; background: var(--rule); margin: 22px 0 28px; }
+
+  /* ---------- KPI ---------- */
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .stat-tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .stat-tile .label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; display:flex; align-items:center; gap:7px; }
+  .stat-tile .value { font-size: 28px; font-weight: 700; line-height: 1.1; }
+  .stat-tile .sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; display:inline-block; }
+
+  /* ---------- section framing ---------- */
+  .panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 22px 24px; margin-top: 18px; }
+  section { margin-top: 42px; }
+  .section-head { display:flex; align-items:flex-start; gap:12px; }
+  .section-num { flex:none; width:26px; height:26px; border-radius:8px; background: var(--surface-2);
+    border:1px solid var(--border); color: var(--text-secondary); font-size:12.5px; font-weight:700;
+    display:grid; place-items:center; margin-top:1px; }
+  .section-title { font-size: 17px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  .section-desc { font-size: 13px; color: var(--text-secondary); margin: 5px 0 0; max-width: 78ch; }
+
+  /* ---------- legend ---------- */
+  .legend { display:flex; flex-wrap:wrap; gap: 8px 18px; margin-bottom: 16px; font-size: 12.5px; color: var(--text-secondary); }
+  .legend .item { display:flex; align-items:center; gap:7px; }
+
+  /* ---------- matrix ---------- */
+  .matrix { width:100%; border-collapse: separate; border-spacing: 0; }
+  .matrix th { text-align:left; font-size: 12px; font-weight:600; color: var(--text-secondary);
+    padding: 0 12px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  .matrix th .colhead { display:flex; align-items:center; gap:6px; }
+  .matrix td { padding: 11px 12px; border-bottom: 1px solid var(--grid); vertical-align: middle; }
+  .matrix tr:last-child td { border-bottom: none; }
+  .matrix td.projcell { border-left: 4px solid transparent; padding-left: 14px; }
+  .matrix tr.s-good  td.projcell { border-left-color: var(--ok); }
+  .matrix tr.s-serious td.projcell { border-left-color: var(--sev-ink); }
+  .matrix tr.s-warning td.projcell { border-left-color: var(--warn-ink); }
+  .matrix tr.s-neutral td.projcell { border-left-color: var(--rule); }
+  .pname { font-weight: 650; font-size: 14px; }
+  .pdesc { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+  .cell { display:inline-flex; align-items:center; gap:6px; font-size: 12.5px; font-weight: 600;
+    padding: 4px 10px; border-radius: 7px; white-space: nowrap; }
+  .cell .mk { font-size: 11px; }
+  .cell.on-gh { color: var(--gh); background: color-mix(in srgb, var(--gh) 12%, transparent); }
+  .cell.on-sb { color: var(--sb); background: color-mix(in srgb, var(--sb) 14%, transparent); }
+  .cell.on-vc { color: var(--vc); background: color-mix(in srgb, var(--vc) 14%, transparent); }
+  .cell.on-etc { color: var(--text-secondary); background: var(--off-bg); }
+  .cell.paused { color: var(--sev-ink); background: var(--sev-bg); }
+  .cell.none { color: var(--text-muted); background: transparent; padding-left: 2px; font-weight: 500; }
+
+  .verdict { display:inline-flex; align-items:center; gap:6px; font-size: 12.5px; font-weight:700;
+    padding: 4px 11px; border-radius: 999px; white-space: nowrap; }
+  .verdict.good { color: var(--ok); background: color-mix(in srgb, var(--ok) 13%, transparent); }
+  .verdict.serious { color: var(--sev-ink); background: var(--sev-bg); }
+  .verdict.warning { color: var(--warn-ink); background: var(--warn-bg); }
+  .verdict.neutral { color: var(--text-muted); background: var(--off-bg); }
+
+  /* ---------- action list ---------- */
+  .action { display:flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--grid); }
+  .action:last-child { border-bottom: none; }
+  .action:first-child { padding-top: 2px; }
+  .action .mark { flex:none; width: 30px; height: 30px; border-radius: 9px; display:grid; place-items:center; font-size: 15px; }
+  .action .mark.serious { background: var(--sev-bg); }
+  .action .mark.warning { background: var(--warn-bg); }
+  .action .atext .at { font-weight: 650; font-size: 13.5px; }
+  .action .atext .ad { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* ---------- flow cards ---------- */
+  .flow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 14px; }
+  .flow-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 8px; }
+  .flow-head { display:flex; align-items:center; justify-content: space-between; gap:10px; margin-bottom: 4px; }
+  .flow-title { font-weight: 700; font-size: 14px; }
+  .flow-card svg { display:block; width: 100%; height: auto; }
+  .nbox { fill: var(--surface-1); stroke: var(--border); }
+  .ntitle { font-size: 13px; font-weight: 650; fill: var(--text-primary); }
+  .nsub { font-size: 11px; fill: var(--text-muted); }
+  .edgelab { font-size: 10.5px; fill: var(--text-muted); }
+
+  /* ---------- note cards ---------- */
+  .note-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 12px; }
+  .note { background: var(--surface-2); border: 1px solid var(--border); border-radius: 11px; padding: 13px 15px; }
+  .note .nt { font-weight: 650; font-size: 13.5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .note .nd { font-size: 12.5px; color: var(--text-secondary); margin-top: 5px; }
+  .note code { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; background: var(--surface-1); padding: 1px 5px; border-radius: 4px; }
+
+  footer { color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--rule); padding-top: 18px; margin-top: 48px; }
+
+  @media (max-width: 760px) {
+    .matrix thead { display: none; }
+    .matrix, .matrix tbody, .matrix tr, .matrix td { display: block; width: 100%; }
+    .matrix tr { border: 1px solid var(--border); border-radius: 11px; margin-bottom: 10px; padding: 4px 0; }
+    .matrix td { border-bottom: none; padding: 5px 14px; }
+    .matrix td.projcell { border-left: none; border-top: 4px solid transparent; border-radius: 11px 11px 0 0; }
+    .matrix td[data-col]::before { content: attr(data-col); display:inline-block; width: 78px;
+      font-size: 11px; color: var(--text-muted); }
+    .flow-grid, .note-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap" id="app"></div>
+</div>
+
+<script>
+/* ============================================================
+   DATA — 대시보드의 단일 진실 공급원(single source of truth).
+   자동 갱신 시 이 객체만 새 값으로 교체하면
+   요약·매트릭스·도식·목록이 전부 자동으로 다시 그려집니다.
+
+   ▼▼▼ 자동 갱신 시 아래 DATA 객체만 통째로 교체하세요 ▼▼▼
+   ============================================================ */
+const DATA = {
+  snapshot: "2026-08-08 08:05 (KST)",
+  github: { user: "ghehddl12-cyber", total: 10, publicCount: 6, privateCount: 4 },
+  supabaseOrg: { name: "ghehddl12-cyber's Org", plan: "Free", monthlyCost: 0, total: 6, active: 2, inactive: 4 },
+  vercelTeam: { name: "covered1", total: 2 },
+  projects: [
+    {
+      key: "real-estate-crm", title: "real-estate-crm", desc: "부동산 CRM · 매물/고객/매칭",
+      github: { repo: "real-estate-crm", visibility: "private" },
+      supabase: { name: "real-estate-crm", region: "ap-northeast-2", status: "ACTIVE_HEALTHY" },
+      vercel: { name: "real-estate-crm", state: "READY" },
+      otherStack: null, overall: "good",
+      note: "세 플랫폼이 모두 연결·정상. 가장 활발히 작업 중인 프로젝트입니다."
+    },
+    {
+      key: "admin-agent-crm", title: "admin-agent-crm", desc: "사건/의뢰인 관리 CRM",
+      github: { repo: "admin-agent-crm", visibility: "public" },
+      supabase: { name: "admin-agent-crm", region: "ap-northeast-2", status: "INACTIVE" },
+      vercel: { name: "admin-agent-crm", state: "READY" },
+      otherStack: null, overall: "serious",
+      note: "배포된 앱은 살아있지만 연결된 DB가 멈춰 있어, 접속 시 데이터가 안 나올 수 있습니다."
+    },
+    {
+      key: "english-diary", title: "english-diary", desc: "영어 일기 앱",
+      github: { repo: "ENGLISH-DIARY", visibility: "public" },
+      supabase: { name: "english-diary", region: "ap-northeast-2", status: "ACTIVE_HEALTHY" },
+      vercel: null, otherStack: null, overall: "warning",
+      note: "DB는 정상 가동 중인데 Vercel에 배포 프로젝트가 없습니다. 다른 곳에 배포했는지 확인이 필요합니다."
+    },
+    {
+      key: "my-dividend-manager", title: "my-dividend-manager", desc: "배당 관리 앱",
+      github: { repo: "MY-DIVIDEND-MANAGER", visibility: "public" },
+      supabase: { name: "my-dividend-manager", region: "ap-northeast-2", status: "INACTIVE" },
+      vercel: null, otherStack: null, overall: "warning",
+      note: "DB가 멈춰 있고 배포처도 없습니다. 현재 중단된 프로젝트인지 확인이 필요합니다."
+    },
+    {
+      key: "nomad-workation", title: "NOMAD-WORKATION", desc: "노마워크 · 채용/워케이션",
+      github: { repo: "NOMAD-WORKATION", visibility: "private" },
+      supabase: null, vercel: null, otherStack: "Cloudflare Pages + D1", overall: "neutral",
+      note: "Supabase/Vercel이 아닌 Cloudflare 스택으로 별도 운영 중입니다."
+    },
+    {
+      key: "blog", title: "blog", desc: "블로그 자동화",
+      github: { repo: "blog", visibility: "public" },
+      supabase: null, vercel: null, otherStack: "Tistory", overall: "neutral",
+      note: "실제 게시는 티스토리에서 이루어져 Supabase/Vercel과 무관합니다."
+    },
+    {
+      key: "namawork", title: "namawork", desc: "신규 저장소",
+      github: { repo: "namawork", visibility: "public" },
+      supabase: null, vercel: null, otherStack: null, overall: "warning",
+      note: "NOMAD-WORKATION과 이름이 비슷해 재작업인지 신규인지 불명확합니다."
+    },
+    {
+      key: "interest-rate-manager", title: "interest-rate-manager", desc: "신규 저장소",
+      github: { repo: "interest-rate-manager", visibility: "public" },
+      supabase: null, vercel: null, otherStack: null, overall: "warning",
+      note: "아직 DB·배포가 연결되지 않은 초기 단계로 보입니다."
+    },
+    {
+      key: "pg-merchant-risk-analyzer", title: "pg-merchant-risk-analyzer", desc: "PG 가맹점 위험도 분석",
+      github: { repo: "pg-merchant-risk-analyzer", visibility: "private" },
+      supabase: null, vercel: null, otherStack: null, overall: "warning",
+      note: "연결된 DB·배포처를 찾지 못했습니다."
+    },
+    {
+      key: "one-dash", title: "1-", desc: "용도 불명 저장소",
+      github: { repo: "1-", visibility: "private" },
+      supabase: null, vercel: null, otherStack: null, overall: "warning",
+      note: "이름만으로는 용도를 알 수 없습니다. 테스트용이면 정리해도 좋습니다."
+    }
+  ],
+  orphanSupabase: [
+    { name: "sigye-bogwanham", region: "ap-northeast-2", status: "INACTIVE", note: "대응하는 GitHub 저장소를 찾지 못했습니다." },
+    { name: "ghehddl12-cyber's Project", region: "ap-southeast-1", status: "INACTIVE", note: "이름을 바꾸지 않은 초기 테스트 프로젝트로 보입니다." }
+  ]
+};
+/* ▲▲▲ 여기까지가 교체 대상. 아래 렌더링 코드는 건드리지 마세요 ▲▲▲ */
+
+/* ---------------- helpers ---------------- */
+const VERDICT = {
+  good:    { cls:"good",    icon:"●", label:"정상 운영" },
+  serious: { cls:"serious", icon:"▲", label:"DB 정지" },
+  warning: { cls:"warning", icon:"◆", label:"확인 필요" },
+  neutral: { cls:"neutral", icon:"○", label:"다른 스택" }
+};
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function verdictChip(o){ const v = VERDICT[o]; return `<span class="verdict ${v.cls}">${v.icon} ${v.label}</span>`; }
+
+function cellGithub(p){
+  return `<span class="cell on-gh"><span class="mk">✓</span>${esc(p.github.visibility)}</span>`;
+}
+function cellSupabase(p){
+  if (!p.supabase) return `<span class="cell none">—</span>`;
+  const ok = p.supabase.status === "ACTIVE_HEALTHY";
+  return ok
+    ? `<span class="cell on-sb"><span class="mk">✓</span>활성</span>`
+    : `<span class="cell paused"><span class="mk">⏸</span>일시정지</span>`;
+}
+function cellVercel(p){
+  if (!p.vercel) return `<span class="cell none">—</span>`;
+  const ok = p.vercel.state === "READY";
+  return ok
+    ? `<span class="cell on-vc"><span class="mk">✓</span>배포됨</span>`
+    : `<span class="cell paused"><span class="mk">⏸</span>${esc(p.vercel.state)}</span>`;
+}
+function cellEtc(p){
+  if (!p.otherStack) return `<span class="cell none">—</span>`;
+  return `<span class="cell on-etc"><span class="mk">◇</span>${esc(p.otherStack)}</span>`;
+}
+
+/* ---------------- matrix ---------------- */
+function renderMatrix(data){
+  const order = { good:0, serious:1, warning:2, neutral:3 };
+  const rows = [...data.projects].sort((a,b) => order[a.overall] - order[b.overall]);
+  return `
+  <table class="matrix">
+    <thead>
+      <tr>
+        <th style="width:27%">프로젝트</th>
+        <th style="width:14%"><span class="colhead"><span class="swatch" style="background:var(--gh)"></span>GitHub</span></th>
+        <th style="width:15%"><span class="colhead"><span class="swatch" style="background:var(--sb)"></span>Supabase (DB)</span></th>
+        <th style="width:14%"><span class="colhead"><span class="swatch" style="background:var(--vc)"></span>Vercel (배포)</span></th>
+        <th style="width:15%"><span class="colhead"><span class="swatch" style="background:var(--etc)"></span>기타 스택</span></th>
+        <th style="width:15%">종합</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(p => `
+      <tr class="s-${p.overall}">
+        <td class="projcell"><div class="pname">${esc(p.title)}</div><div class="pdesc">${esc(p.desc)}</div></td>
+        <td data-col="GitHub">${cellGithub(p)}</td>
+        <td data-col="Supabase">${cellSupabase(p)}</td>
+        <td data-col="Vercel">${cellVercel(p)}</td>
+        <td data-col="기타">${cellEtc(p)}</td>
+        <td data-col="종합">${verdictChip(p.overall)}</td>
+      </tr>`).join("")}
+    </tbody>
+  </table>`;
+}
+
+/* ---------------- flow diagram ---------------- */
+function renderFlowCard(p){
+  const hasSb = !!p.supabase, hasVc = !!p.vercel;
+  const sbPaused = hasSb && p.supabase.status !== "ACTIVE_HEALTHY";
+  const H = hasSb ? 168 : 96;
+  const gh = "var(--gh)", sb = "var(--sb)", vc = "var(--vc)", mut = "var(--text-muted)";
+  const vcStroke = hasVc ? vc : mut;
+  const sbStroke = sbPaused ? "var(--sev-ink)" : sb;
+  // 저장소 이름 길이에 맞춰 글자 크기를 줄여 박스 밖으로 넘치지 않게 함
+  const repo = p.github.repo;
+  const repoFs = repo.length > 18 ? 10.5 : repo.length > 14 ? 11.5 : 13;
+
+  let s = `<svg viewBox="0 0 520 ${H}" xmlns="http://www.w3.org/2000/svg" role="img">
+  <defs>
+    <marker id="a-gh-${p.key}" markerWidth="7" markerHeight="7" refX="5.5" refY="2.75" orient="auto"><path d="M0,0 L5.5,2.75 L0,5.5 Z" fill="${gh}"/></marker>
+    <marker id="a-vc-${p.key}" markerWidth="7" markerHeight="7" refX="5.5" refY="2.75" orient="auto"><path d="M0,0 L5.5,2.75 L0,5.5 Z" fill="${vcStroke}"/></marker>
+    <marker id="a-sb-${p.key}" markerWidth="7" markerHeight="7" refX="5.5" refY="2.75" orient="auto"><path d="M0,0 L5.5,2.75 L0,5.5 Z" fill="${sbStroke}"/></marker>
+  </defs>
+
+  <rect x="2" y="16" width="104" height="46" rx="9" class="nbox" stroke-width="1.5"/>
+  <text class="ntitle" x="54" y="37" text-anchor="middle">💻 내 코드</text>
+  <text class="nsub" x="54" y="52" text-anchor="middle">git push</text>
+
+  <line x1="108" y1="39" x2="160" y2="39" stroke="${gh}" stroke-width="2" marker-end="url(#a-gh-${p.key})"/>
+
+  <rect x="166" y="16" width="164" height="46" rx="9" class="nbox" stroke="${gh}" stroke-width="2"/>
+  <text class="ntitle" x="248" y="37" text-anchor="middle" style="font-size:${repoFs}px">🐙 ${esc(repo)}</text>
+  <text class="nsub" x="248" y="52" text-anchor="middle">GitHub · ${esc(p.github.visibility)}</text>
+
+  <line x1="332" y1="39" x2="388" y2="39" stroke="${vcStroke}" stroke-width="2" stroke-dasharray="${hasVc ? "none" : "5,4"}" marker-end="url(#a-vc-${p.key})"/>
+  <text class="edgelab" x="360" y="30" text-anchor="middle">${hasVc ? "자동 배포" : "미연결"}</text>
+
+  <rect x="394" y="16" width="124" height="46" rx="9" class="nbox" stroke="${vcStroke}" stroke-width="2" stroke-dasharray="${hasVc ? "none" : "5,4"}"/>
+  <text class="ntitle" x="456" y="37" text-anchor="middle">${hasVc ? "▲ Vercel" : "▲ 없음"}</text>
+  <text class="nsub" x="456" y="52" text-anchor="middle">${hasVc ? "배포 완료" : "확인 필요"}</text>`;
+
+  if (hasSb) {
+    s += `
+  <line x1="248" y1="64" x2="248" y2="104" stroke="${sbStroke}" stroke-width="2" stroke-dasharray="${sbPaused ? "5,4" : "none"}" marker-end="url(#a-sb-${p.key})"/>
+  <text class="edgelab" x="258" y="88" text-anchor="start">데이터 연결</text>
+
+  <rect x="166" y="110" width="164" height="46" rx="9" class="nbox" stroke="${sbStroke}" stroke-width="2" stroke-dasharray="${sbPaused ? "5,4" : "none"}"/>
+  <text class="ntitle" x="248" y="131" text-anchor="middle">⚡ Supabase DB</text>
+  <text class="nsub" x="248" y="146" text-anchor="middle">${sbPaused ? "일시정지 — 깨우기 필요" : "정상 가동 중"}</text>`;
+
+    if (hasVc) {
+      s += `
+  <path d="M 394 39 L 366 39 L 366 133 L 336 133" fill="none" stroke="${sbStroke}" stroke-width="1.5" stroke-dasharray="2,4" opacity="0.6"/>
+  <text class="edgelab" x="400" y="137" text-anchor="start">앱이 DB를 조회</text>`;
+    }
+  }
+
+  s += `</svg>`;
+  return `<div class="flow-card">
+    <div class="flow-head"><span class="flow-title">${esc(p.title)}</span>${verdictChip(p.overall)}</div>
+    ${s}
+  </div>`;
+}
+
+/* ---------------- page ---------------- */
+function render(data){
+  const P = data.projects;
+  const needsAction = P.filter(p => p.overall === "serious" || p.overall === "warning");
+  const flowCards = P.filter(p => p.supabase || p.vercel);
+  const unlinked = P.filter(p => !p.supabase && !p.vercel && !p.otherStack);
+  const otherStack = P.filter(p => p.otherStack);
+  const fullyOk = P.filter(p => p.overall === "good").length;
+
+  document.getElementById("app").innerHTML = `
+    <div class="title-row">
+      <h1>내 프로젝트 · 플랫폼 현황</h1>
+      <span class="sync-badge">⏱ 매시간 자동 갱신</span>
+    </div>
+    <div class="meta">
+      스냅샷 ${esc(data.snapshot)} · GitHub <code>${esc(data.github.user)}</code> ·
+      Supabase <code>${esc(data.supabaseOrg.plan)}</code> · Vercel <code>${esc(data.vercelTeam.name)}</code>
+    </div>
+    <div class="headline-rule"></div>
+
+    <div class="stat-row">
+      <div class="stat-tile"><div class="label"><span class="swatch" style="background:var(--gh)"></span>GitHub 저장소</div>
+        <div class="value">${data.github.total}</div><div class="sub">공개 ${data.github.publicCount} · 비공개 ${data.github.privateCount}</div></div>
+      <div class="stat-tile"><div class="label"><span class="swatch" style="background:var(--sb)"></span>Supabase DB</div>
+        <div class="value">${data.supabaseOrg.total}</div><div class="sub">가동 ${data.supabaseOrg.active} · 정지 ${data.supabaseOrg.inactive}</div></div>
+      <div class="stat-tile"><div class="label"><span class="swatch" style="background:var(--vc)"></span>Vercel 배포</div>
+        <div class="value">${data.vercelTeam.total}</div><div class="sub">모두 배포 성공</div></div>
+      <div class="stat-tile"><div class="label">이번 달 비용</div>
+        <div class="value">$${data.supabaseOrg.monthlyCost}</div><div class="sub">전부 무료 플랜</div></div>
+      <div class="stat-tile"><div class="label">손봐야 할 항목</div>
+        <div class="value">${needsAction.length}</div><div class="sub">완전 정상은 ${fullyOk}개</div></div>
+    </div>
+
+    <section>
+      <div class="section-head">
+        <span class="section-num">1</span>
+        <div>
+          <h2 class="section-title">연결 현황 한눈에 보기</h2>
+          <p class="section-desc">가로 한 줄이 프로젝트 하나입니다. 각 칸을 보면 그 프로젝트가 어떤 플랫폼을 쓰고 있고 지금 어떤 상태인지 바로 알 수 있습니다. 왼쪽 세로 색 막대는 종합 상태를 나타냅니다.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="legend">
+          <span class="item"><span class="cell on-sb"><span class="mk">✓</span>연결·정상</span></span>
+          <span class="item"><span class="cell paused"><span class="mk">⏸</span>연결됐지만 멈춤</span></span>
+          <span class="item"><span class="cell none">—</span> 사용 안 함 / 미연결</span>
+        </div>
+        ${renderMatrix(data)}
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <span class="section-num">2</span>
+        <div>
+          <h2 class="section-title">지금 손봐야 할 것</h2>
+          <p class="section-desc">위 표에서 정상이 아닌 항목만 모아, 무엇을 확인하면 되는지 정리했습니다.</p>
+        </div>
+      </div>
+      <div class="panel">
+        ${needsAction.map(p => `
+          <div class="action">
+            <div class="mark ${p.overall === 'serious' ? 'serious' : 'warning'}">${p.overall === 'serious' ? '▲' : '◆'}</div>
+            <div class="atext">
+              <div class="at">${esc(p.title)}</div>
+              <div class="ad">${esc(p.note)}</div>
+            </div>
+          </div>`).join("")}
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <span class="section-num">3</span>
+        <div>
+          <h2 class="section-title">배포가 흘러가는 구조</h2>
+          <p class="section-desc">실제로 플랫폼에 연결된 프로젝트만, 코드가 어디를 거쳐 서비스가 되는지 그렸습니다. 점선은 아직 연결되지 않았거나 멈춰 있는 구간입니다.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="flow-grid">${flowCards.map(renderFlowCard).join("")}</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <span class="section-num">4</span>
+        <div>
+          <h2 class="section-title">아직 플랫폼에 안 붙은 저장소</h2>
+          <p class="section-desc">GitHub에만 있고 DB·배포가 연결되지 않은 저장소입니다. 초기 단계이거나 정리 대상일 수 있습니다.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="note-grid">
+          ${unlinked.map(p => `<div class="note"><div class="nt">${esc(p.title)} ${verdictChip(p.overall)}</div><div class="nd">${esc(p.note)}</div></div>`).join("")}
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <span class="section-num">5</span>
+        <div>
+          <h2 class="section-title">주인을 못 찾은 Supabase DB</h2>
+          <p class="section-desc">어떤 저장소와 짝인지 이름으로 확인되지 않는 DB입니다. 안 쓰는 것이면 삭제해 정리할 수 있습니다.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="note-grid">
+          ${data.orphanSupabase.map(o => `<div class="note"><div class="nt">${esc(o.name)} <span class="verdict warning">◆ 확인 필요</span></div><div class="nd">${esc(o.region)} · ${esc(o.status)} — ${esc(o.note)}</div></div>`).join("")}
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <span class="section-num">6</span>
+        <div>
+          <h2 class="section-title">다른 스택으로 돌아가는 것</h2>
+          <p class="section-desc">Supabase·Vercel을 쓰지 않아 위 집계와 별개로 관리되는 프로젝트입니다.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="note-grid">
+          ${otherStack.map(p => `<div class="note"><div class="nt">${esc(p.title)} <span class="verdict neutral">○ ${esc(p.otherStack)}</span></div><div class="nd">${esc(p.note)}</div></div>`).join("")}
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      ${esc(data.snapshot)} 기준으로 GitHub·Supabase·Vercel 계정에서 직접 조회한 결과이며, 매시간 자동으로 다시 조회해 갱신됩니다.
+      "확인 필요"는 이름만으로 짝을 찾지 못해 표시한 것이라 실제로는 정상일 수 있습니다. 각 프로젝트의 실제 용도를 알려주시면 다음 갱신부터 정확히 반영됩니다.
+    </footer>
+  `;
+}
+
+render(DATA);
+</script>
+</body>
+</html>
