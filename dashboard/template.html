@@ -24,10 +24,13 @@
     --vc:             #4a3aa7;
     --etc:            #898781;
     --ok:             #0ca30c;
+    --ok-solid:       #0ca30c;
     --warn-ink:       #8a5c08;
     --warn-bg:        #fdf0d0;
+    --warn-solid:     #eda100;
     --sev-ink:        #a44a22;
     --sev-bg:         #fbe3d8;
+    --sev-solid:      #d5622c;
     --off-bg:         #eeede8;
   }
   @media (prefers-color-scheme: dark) {
@@ -50,10 +53,13 @@
       --vc:             #9085e9;
       --etc:            #898781;
       --ok:             #0ca30c;
+      --ok-solid:       #0ca30c;
       --warn-ink:       #fab219;
       --warn-bg:        #3a2c0c;
+      --warn-solid:     #c98500;
       --sev-ink:        #ec835a;
       --sev-bg:         #3d2317;
+      --sev-solid:      #d5622c;
       --off-bg:         #262625;
     }
   }
@@ -76,10 +82,13 @@
     --vc:             #9085e9;
     --etc:            #898781;
     --ok:             #0ca30c;
+    --ok-solid:       #0ca30c;
     --warn-ink:       #fab219;
     --warn-bg:        #3a2c0c;
+    --warn-solid:     #c98500;
     --sev-ink:        #ec835a;
     --sev-bg:         #3d2317;
+    --sev-solid:      #d5622c;
     --off-bg:         #262625;
   }
 
@@ -94,8 +103,8 @@
   .swatch { width: 10px; height: 10px; border-radius: 3px; display:inline-block; flex:none; }
 
   /* ================= layout ================= */
-  .layout { display: grid; grid-template-columns: 244px minmax(0, 1fr); gap: 30px;
-    max-width: 1320px; margin: 0 auto; padding: 30px 24px 72px; align-items: start; }
+  .layout { display: grid; grid-template-columns: 244px minmax(0, 1fr); gap: 32px;
+    max-width: 1340px; margin: 0 auto; padding: 30px 24px 80px; align-items: start; }
 
   /* ================= sidebar ================= */
   .sidebar { position: sticky; top: 30px; min-width: 0; }
@@ -121,7 +130,8 @@
   .nav .cnt { flex:none; font-size: 11.5px; font-weight: 700; color: var(--text-muted);
     background: var(--surface-2); border-radius: 999px; padding: 1px 7px; }
   .nav button[aria-current="true"] .cnt { background: color-mix(in srgb, var(--active-ink) 20%, transparent); color: var(--active-ink); }
-  .nav .cnt.alert { background: var(--sev-bg); color: var(--sev-ink); }
+  .nav .cnt.alert { background: var(--sev-solid); color: #fff; }
+  .nav button[aria-current="true"] .cnt.alert { background: var(--sev-solid); color: #fff; }
 
   .side-foot { margin-top: 18px; padding: 14px 12px 0; border-top: 1px solid var(--grid);
     font-size: 11.5px; color: var(--text-muted); }
@@ -138,12 +148,22 @@
   @keyframes fade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { .view { animation: none; } }
 
-  .view-head { margin-bottom: 20px; }
-  .view-head h1 { font-size: 21px; font-weight: 700; margin: 0; letter-spacing: -0.015em; }
+  .view-head { margin-bottom: 22px; }
+  .view-head h1 { font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.015em; }
   .view-head p { font-size: 13.5px; color: var(--text-secondary); margin: 7px 0 0; max-width: 80ch; }
 
   .panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px 22px; }
-  .panel + .panel { margin-top: 14px; }
+
+  /* group heading shared by every list */
+  .group { margin-top: 30px; }
+  .group:first-child { margin-top: 0; }
+  .group-head { display:flex; align-items:center; gap:9px; margin-bottom: 12px; }
+  .group-head .gdot { width:11px; height:11px; border-radius:50%; flex:none; }
+  .group-head .gt { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+  .group-head .gc { font-size: 11.5px; font-weight: 700; color: var(--text-secondary);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
+  .group-head .grule { flex: 1 1 auto; height: 1px; background: var(--grid); margin-left: 3px; }
+  .group-head .ghint { font-size: 12px; color: var(--text-muted); }
 
   /* ---------- KPI ---------- */
   .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 12px; }
@@ -151,37 +171,60 @@
   .stat-tile .label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; display:flex; align-items:center; gap:7px; }
   .stat-tile .value { font-size: 30px; font-weight: 700; line-height: 1.1; }
   .stat-tile .sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .stat-tile.flag { border-color: color-mix(in srgb, var(--sev-solid) 45%, transparent);
+    background: color-mix(in srgb, var(--sev-solid) 7%, var(--surface-1)); }
+  .stat-tile.flag .value { color: var(--sev-ink); }
 
-  .overview-note { margin-top: 14px; }
-  .ov-line { display:flex; gap:11px; align-items:flex-start; padding: 11px 0; border-bottom: 1px solid var(--grid); font-size: 13.5px; }
+  /* health bar */
+  .health { margin-top: 14px; }
+  .health .hbar { display:flex; gap:2px; height: 12px; margin-bottom: 12px; }
+  .health .seg { border-radius: 3px; min-width: 10px; }
+  .health .seg:first-child { border-radius: 6px 3px 3px 6px; }
+  .health .seg:last-child { border-radius: 3px 6px 6px 3px; }
+  .health .hleg { display:flex; flex-wrap:wrap; gap: 6px 20px; }
+  .health .hitem { display:flex; align-items:center; gap:7px; font-size: 12.5px; color: var(--text-secondary); }
+  .health .hitem b { color: var(--text-primary); font-weight: 700; }
+
+  .ov-line { display:flex; gap:11px; align-items:center; padding: 12px 0; border-bottom: 1px solid var(--grid); font-size: 13.5px; }
   .ov-line:last-child { border-bottom: none; }
-  .ov-line .ic { flex:none; width:24px; height:24px; border-radius:7px; display:grid; place-items:center; font-size:12px; }
+  .ov-line .ic { flex:none; width:26px; height:26px; border-radius:8px; display:grid; place-items:center; font-size:12px; }
   .ov-line .ic.good { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
   .ov-line .ic.serious { background: var(--sev-bg); color: var(--sev-ink); }
   .ov-line .ic.warning { background: var(--warn-bg); color: var(--warn-ink); }
   .ov-line .ic.neutral { background: var(--off-bg); color: var(--text-muted); }
-  .ov-line b { font-weight: 650; }
+  .ov-line b { font-weight: 700; }
   .ov-line .go { margin-left:auto; flex:none; font-size:12.5px; font-weight:600; color: var(--text-muted);
-    background:none; border:none; cursor:pointer; font-family: inherit; padding: 2px 4px; border-radius: 6px; }
+    background:none; border:none; cursor:pointer; font-family: inherit; padding: 4px 8px; border-radius: 7px; }
   .ov-line .go:hover { color: var(--text-primary); background: var(--hover); }
+  .ov-line .go:focus-visible { outline: 2px solid var(--gh); outline-offset: 1px; }
 
-  /* ---------- matrix ---------- */
-  .legend { display:flex; flex-wrap:wrap; gap: 8px 18px; margin-bottom: 16px; font-size: 12.5px; color: var(--text-secondary); }
+  /* ---------- matrix (grouped card rows) ---------- */
+  .legend { display:flex; flex-wrap:wrap; gap: 8px 18px; margin-bottom: 4px; font-size: 12.5px; color: var(--text-secondary); }
   .legend .item { display:flex; align-items:center; gap:7px; }
 
-  .matrix { width:100%; border-collapse: separate; border-spacing: 0; }
-  .matrix th { text-align:left; font-size: 12px; font-weight:600; color: var(--text-secondary);
-    padding: 0 12px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
-  .matrix th .colhead { display:flex; align-items:center; gap:6px; }
-  .matrix td { padding: 11px 12px; border-bottom: 1px solid var(--grid); vertical-align: middle; }
-  .matrix tr:last-child td { border-bottom: none; }
-  .matrix td.projcell { border-left: 4px solid transparent; padding-left: 14px; }
-  .matrix tr.s-good  td.projcell { border-left-color: var(--ok); }
-  .matrix tr.s-serious td.projcell { border-left-color: var(--sev-ink); }
-  .matrix tr.s-warning td.projcell { border-left-color: var(--warn-ink); }
-  .matrix tr.s-neutral td.projcell { border-left-color: var(--rule); }
-  .pname { font-weight: 650; font-size: 14px; }
-  .pdesc { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .rows { display:flex; flex-direction: column; gap: 8px; }
+  .row {
+    display: grid; grid-template-columns: minmax(0,1.5fr) repeat(4, minmax(0,0.85fr)) auto;
+    align-items: center; gap: 10px;
+    background: var(--surface-1); border: 1px solid var(--border); border-left: 5px solid var(--rule);
+    border-radius: 11px; padding: 13px 16px;
+  }
+  .row:hover { background: var(--hover); }
+  .row > div { min-width: 0; }
+  .row .clabel { display: none; }
+  .row .cellwrap { display: flex; align-items: center; min-width: 0; }
+  .row.s-good    { border-left-color: var(--ok-solid); }
+  .row.s-serious { border-left-color: var(--sev-solid); }
+  .row.s-warning { border-left-color: var(--warn-solid); }
+  .row.s-neutral { border-left-color: var(--rule); }
+  .row .pname { font-weight: 650; font-size: 14.5px; letter-spacing: -0.01em; }
+  .row .pdesc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .colhead-row {
+    display: grid; grid-template-columns: minmax(0,1.5fr) repeat(4, minmax(0,0.85fr)) auto;
+    gap: 10px; padding: 0 16px 8px; border-bottom: 1px solid var(--grid); margin-bottom: 10px;
+  }
+  .colhead-row span { font-size: 11.5px; font-weight: 600; color: var(--text-muted);
+    display:flex; align-items:center; gap:6px; }
 
   .cell { display:inline-flex; align-items:center; gap:6px; font-size: 12.5px; font-weight: 600;
     padding: 4px 10px; border-radius: 7px; white-space: nowrap; }
@@ -189,9 +232,9 @@
   .cell.on-gh { color: var(--gh); background: color-mix(in srgb, var(--gh) 12%, transparent); }
   .cell.on-sb { color: var(--sb); background: color-mix(in srgb, var(--sb) 14%, transparent); }
   .cell.on-vc { color: var(--vc); background: color-mix(in srgb, var(--vc) 14%, transparent); }
-  .cell.on-etc { color: var(--text-secondary); background: var(--off-bg); }
+  .cell.on-etc { color: var(--text-secondary); background: var(--off-bg); white-space: normal; }
   .cell.paused { color: var(--sev-ink); background: var(--sev-bg); }
-  .cell.none { color: var(--text-muted); background: transparent; padding-left: 2px; font-weight: 500; }
+  .cell.none { color: var(--text-muted); background: transparent; padding-left: 2px; font-weight: 500; opacity: .65; }
 
   .verdict { display:inline-flex; align-items:center; gap:6px; font-size: 12.5px; font-weight:700;
     padding: 4px 11px; border-radius: 999px; white-space: nowrap; }
@@ -201,35 +244,70 @@
   .verdict.neutral { color: var(--text-muted); background: var(--off-bg); }
 
   /* ---------- actions ---------- */
-  .action { display:flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--grid); }
-  .action:last-child { border-bottom: none; }
-  .action:first-child { padding-top: 2px; }
-  .action .mark { flex:none; width: 30px; height: 30px; border-radius: 9px; display:grid; place-items:center; font-size: 15px; }
-  .action .mark.serious { background: var(--sev-bg); color: var(--sev-ink); }
-  .action .mark.warning { background: var(--warn-bg); color: var(--warn-ink); }
-  .action .atext .at { font-weight: 650; font-size: 13.5px; }
-  .action .atext .ad { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
+  .act-major {
+    display:flex; gap: 16px; align-items:flex-start;
+    background: color-mix(in srgb, var(--sev-solid) 7%, var(--surface-1));
+    border: 1px solid color-mix(in srgb, var(--sev-solid) 40%, transparent);
+    border-left: 5px solid var(--sev-solid);
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 10px;
+  }
+  .act-major .mk { flex:none; width: 38px; height: 38px; border-radius: 11px; display:grid; place-items:center;
+    font-size: 17px; background: var(--sev-solid); color: #fff; }
+  .act-major .t { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  .act-major .d { font-size: 13.5px; color: var(--text-secondary); margin-top: 5px; }
+  .act-major .fix { display:inline-flex; align-items:center; gap:7px; margin-top: 10px;
+    font-size: 12.5px; font-weight: 650; color: var(--sev-ink);
+    background: var(--surface-1); border: 1px solid color-mix(in srgb, var(--sev-solid) 35%, transparent);
+    border-radius: 8px; padding: 6px 11px; }
+
+  .act-minor { display:flex; gap: 13px; align-items:flex-start;
+    background: var(--surface-1); border: 1px solid var(--border); border-left: 4px solid var(--warn-solid);
+    border-radius: 11px; padding: 13px 16px; margin-bottom: 8px; }
+  .act-minor .mk { flex:none; width: 26px; height: 26px; border-radius: 8px; display:grid; place-items:center;
+    font-size: 12px; background: var(--warn-bg); color: var(--warn-ink); }
+  .act-minor .t { font-size: 13.5px; font-weight: 650; }
+  .act-minor .d { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
+  .act-minor .fix { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+  .act-minor .fix::before { content: "→ "; }
 
   /* ---------- flow ---------- */
   .flow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 14px; }
-  .flow-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 8px; }
+  .flow-card { background: var(--surface-1); border: 1px solid var(--border);
+    border-top: 4px solid var(--rule); border-radius: 12px; padding: 14px 16px 8px; }
+  .flow-card.s-good    { border-top-color: var(--ok-solid); }
+  .flow-card.s-serious { border-top-color: var(--sev-solid); }
+  .flow-card.s-warning { border-top-color: var(--warn-solid); }
   .flow-head { display:flex; align-items:center; justify-content: space-between; gap:10px; margin-bottom: 4px; }
-  .flow-title { font-weight: 700; font-size: 14px; }
+  .flow-title { font-weight: 700; font-size: 14.5px; }
   .flow-card svg { display:block; width: 100%; height: auto; }
-  .nbox { fill: var(--surface-1); stroke: var(--border); }
+  .nbox { fill: var(--surface-2); stroke: var(--border); }
   .ntitle { font-size: 13px; font-weight: 650; fill: var(--text-primary); }
   .nsub { font-size: 11px; fill: var(--text-muted); }
   .edgelab { font-size: 10.5px; fill: var(--text-muted); }
 
   /* ---------- notes ---------- */
-  .note-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
-  .note { background: var(--surface-2); border: 1px solid var(--border); border-radius: 11px; padding: 13px 15px; }
-  .note .nt { font-weight: 650; font-size: 13.5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .note .nd { font-size: 12.5px; color: var(--text-secondary); margin-top: 5px; }
+  .note-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+  .note { display:flex; gap: 13px; align-items:flex-start;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-left: 4px solid var(--rule); border-radius: 11px; padding: 14px 16px; }
+  .note.k-warning { border-left-color: var(--warn-solid); }
+  .note.k-neutral { border-left-color: var(--rule); }
+  .note .ic { flex:none; width: 28px; height: 28px; border-radius: 9px; display:grid; place-items:center; font-size: 13px; }
+  .note.k-warning .ic { background: var(--warn-bg); color: var(--warn-ink); }
+  .note.k-neutral .ic { background: var(--off-bg); color: var(--text-muted); }
+  .note .nt { font-size: 14px; font-weight: 650; letter-spacing: -0.01em; }
+  .note .nm { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+  .note .nd { font-size: 12.5px; color: var(--text-secondary); margin-top: 6px; }
 
   .empty { color: var(--text-muted); font-size: 13px; padding: 6px 0; }
 
   /* ================= responsive ================= */
+  @media (max-width: 1080px) {
+    .row, .colhead-row { grid-template-columns: minmax(0,1.4fr) repeat(4, minmax(0,0.8fr)); }
+    .row > .vcell, .colhead-row > .vhead { grid-column: 1 / -1; }
+    .row > .vcell { margin-top: 2px; }
+    .colhead-row > .vhead { display: none; }
+  }
   @media (max-width: 940px) {
     .layout { grid-template-columns: minmax(0, 1fr); gap: 18px; padding: 22px 16px 56px; }
     .sidebar { position: static; }
@@ -241,14 +319,13 @@
     .side-foot { margin-top: 10px; padding-top: 12px; }
     .flow-grid, .note-grid { grid-template-columns: 1fr; }
   }
-  @media (max-width: 700px) {
-    .matrix thead { display: none; }
-    .matrix, .matrix tbody, .matrix tr, .matrix td { display: block; width: 100%; }
-    .matrix tr { border: 1px solid var(--border); border-radius: 11px; margin-bottom: 10px; padding: 4px 0; }
-    .matrix td { border-bottom: none; padding: 5px 14px; }
-    .matrix td.projcell { border-left: none; border-top: 4px solid transparent; border-radius: 11px 11px 0 0; }
-    .matrix td[data-col]::before { content: attr(data-col); display:inline-block; width: 76px;
-      font-size: 11px; color: var(--text-muted); }
+  @media (max-width: 720px) {
+    .colhead-row { display: none; }
+    .row { grid-template-columns: 1fr; gap: 4px; align-items: start; }
+    .row > .pcell { margin-bottom: 6px; }
+    .row .cellwrap { gap: 8px; }
+    .row .clabel { display: inline; font-size: 11px; color: var(--text-muted); width: 66px; flex:none; }
+    .row > .vcell { margin-top: 8px; }
   }
 </style>
 </head>
@@ -273,7 +350,7 @@
    ▼▼▼ 자동 갱신 시 아래 DATA 객체만 통째로 교체하세요 ▼▼▼
    ============================================================ */
 const DATA = {
-  snapshot: "2026-08-08 08:25 (KST)",
+  snapshot: "2026-08-08 08:40 (KST)",
   github: { user: "ghehddl12-cyber", total: 10, publicCount: 6, privateCount: 4 },
   supabaseOrg: { name: "ghehddl12-cyber's Org", plan: "Free", monthlyCost: 0, total: 6, active: 2, inactive: 4 },
   vercelTeam: { name: "covered1", total: 2 },
@@ -354,23 +431,45 @@ const DATA = {
 
 /* ---------------- helpers ---------------- */
 const VERDICT = {
-  good:    { cls:"good",    icon:"●", label:"정상 운영" },
-  serious: { cls:"serious", icon:"▲", label:"DB 정지" },
-  warning: { cls:"warning", icon:"◆", label:"확인 필요" },
-  neutral: { cls:"neutral", icon:"○", label:"다른 스택" }
+  good:    { cls:"good",    icon:"●", label:"정상 운영", color:"var(--ok-solid)",   group:"정상 운영 중",   hint:"손댈 것 없습니다" },
+  serious: { cls:"serious", icon:"▲", label:"DB 정지",   color:"var(--sev-solid)",  group:"바로 조치 필요", hint:"서비스에 영향이 있습니다" },
+  warning: { cls:"warning", icon:"◆", label:"확인 필요", color:"var(--warn-solid)", group:"확인 필요",      hint:"시간 날 때 정리하면 됩니다" },
+  neutral: { cls:"neutral", icon:"○", label:"다른 스택", color:"var(--rule)",       group:"다른 스택",      hint:"이 집계와 별개입니다" }
 };
+const ORDER = ["good", "serious", "warning", "neutral"];
 const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const chip = o => { const v = VERDICT[o]; return `<span class="verdict ${v.cls}">${v.icon} ${v.label}</span>`; };
 
+/* 상태에서 "무엇을 하면 되는지"를 자동으로 뽑아냅니다 */
+function fixHint(p){
+  const sbPaused = p.supabase && p.supabase.status !== "ACTIVE_HEALTHY";
+  if (sbPaused && p.vercel) return "Supabase에서 이 프로젝트를 Restore 해서 DB를 다시 켜세요";
+  if (sbPaused && !p.vercel) return "계속 쓸 거면 DB를 다시 켜고, 안 쓸 거면 삭제해 정리하세요";
+  if (p.supabase && !p.vercel) return "어디에 배포했는지 확인하거나, Vercel에 저장소를 연결하세요";
+  if (!p.supabase && !p.vercel) return "용도를 정해 DB·배포를 연결하거나, 안 쓰면 저장소를 정리하세요";
+  return "상태를 한 번 확인해 보세요";
+}
+
+function groupHead(kind, count, hint){
+  const v = VERDICT[kind];
+  return `<div class="group-head">
+    <span class="gdot" style="background:${v.color}"></span>
+    <span class="gt">${v.group}</span>
+    <span class="gc">${count}</span>
+    <span class="ghint">${hint || v.hint}</span>
+    <span class="grule"></span>
+  </div>`;
+}
+
 function cellGithub(p){ return `<span class="cell on-gh"><span class="mk">✓</span>${esc(p.github.visibility)}</span>`; }
 function cellSupabase(p){
-  if (!p.supabase) return `<span class="cell none">—</span>`;
+  if (!p.supabase) return `<span class="cell none">— 없음</span>`;
   return p.supabase.status === "ACTIVE_HEALTHY"
     ? `<span class="cell on-sb"><span class="mk">✓</span>활성</span>`
     : `<span class="cell paused"><span class="mk">⏸</span>일시정지</span>`;
 }
 function cellVercel(p){
-  if (!p.vercel) return `<span class="cell none">—</span>`;
+  if (!p.vercel) return `<span class="cell none">— 없음</span>`;
   return p.vercel.state === "READY"
     ? `<span class="cell on-vc"><span class="mk">✓</span>배포됨</span>`
     : `<span class="cell paused"><span class="mk">⏸</span>${esc(p.vercel.state)}</span>`;
@@ -380,44 +479,50 @@ function cellEtc(p){
   return `<span class="cell on-etc"><span class="mk">◇</span>${esc(p.otherStack)}</span>`;
 }
 
-/* ---------------- pieces ---------------- */
-function matrixHtml(data){
-  const order = { good:0, serious:1, warning:2, neutral:3 };
-  const rows = [...data.projects].sort((a,b) => order[a.overall] - order[b.overall]);
-  return `
-  <div class="legend">
-    <span class="item"><span class="cell on-sb"><span class="mk">✓</span>연결·정상</span></span>
-    <span class="item"><span class="cell paused"><span class="mk">⏸</span>연결됐지만 멈춤</span></span>
-    <span class="item"><span class="cell none">—</span> 사용 안 함 / 미연결</span>
-  </div>
-  <table class="matrix">
-    <thead><tr>
-      <th style="width:33%">프로젝트</th>
-      <th style="width:11%"><span class="colhead"><span class="swatch" style="background:var(--gh)"></span>GitHub</span></th>
-      <th style="width:13%"><span class="colhead"><span class="swatch" style="background:var(--sb)"></span>Supabase</span></th>
-      <th style="width:12%"><span class="colhead"><span class="swatch" style="background:var(--vc)"></span>Vercel</span></th>
-      <th style="width:17%"><span class="colhead"><span class="swatch" style="background:var(--etc)"></span>기타 스택</span></th>
-      <th style="width:14%">종합</th>
-    </tr></thead>
-    <tbody>${rows.map(p => `
-      <tr class="s-${p.overall}">
-        <td class="projcell"><div class="pname">${esc(p.title)}</div><div class="pdesc">${esc(p.desc)}</div></td>
-        <td data-col="GitHub">${cellGithub(p)}</td>
-        <td data-col="Supabase">${cellSupabase(p)}</td>
-        <td data-col="Vercel">${cellVercel(p)}</td>
-        <td data-col="기타">${cellEtc(p)}</td>
-        <td data-col="종합">${chip(p.overall)}</td>
-      </tr>`).join("")}</tbody>
-  </table>`;
+/* ---------------- matrix ---------------- */
+function rowHtml(p){
+  return `<div class="row s-${p.overall}">
+    <div class="pcell"><div class="pname">${esc(p.title)}</div><div class="pdesc">${esc(p.desc)}</div></div>
+    <div><span class="cellwrap"><span class="clabel">GitHub</span>${cellGithub(p)}</span></div>
+    <div><span class="cellwrap"><span class="clabel">Supabase</span>${cellSupabase(p)}</span></div>
+    <div><span class="cellwrap"><span class="clabel">Vercel</span>${cellVercel(p)}</span></div>
+    <div><span class="cellwrap"><span class="clabel">기타</span>${cellEtc(p)}</span></div>
+    <div class="vcell">${chip(p.overall)}</div>
+  </div>`;
 }
 
+function matrixHtml(data){
+  const byKind = k => data.projects.filter(p => p.overall === k);
+  const header = `<div class="colhead-row">
+    <span>프로젝트</span>
+    <span><span class="swatch" style="background:var(--gh)"></span>GitHub</span>
+    <span><span class="swatch" style="background:var(--sb)"></span>Supabase</span>
+    <span><span class="swatch" style="background:var(--vc)"></span>Vercel</span>
+    <span><span class="swatch" style="background:var(--etc)"></span>기타 스택</span>
+    <span class="vhead">종합</span>
+  </div>`;
+
+  const groups = ORDER.map(k => {
+    const list = byKind(k);
+    if (!list.length) return "";
+    return `<div class="group">${groupHead(k, list.length)}<div class="rows">${list.map(rowHtml).join("")}</div></div>`;
+  }).join("");
+
+  return `<div class="legend" style="margin-bottom:16px">
+      <span class="item"><span class="cell on-sb"><span class="mk">✓</span>연결·정상</span></span>
+      <span class="item"><span class="cell paused"><span class="mk">⏸</span>연결됐지만 멈춤</span></span>
+      <span class="item"><span class="cell none">— 없음</span> 사용 안 함 / 미연결</span>
+    </div>${header}${groups}`;
+}
+
+/* ---------------- flow ---------------- */
 function flowCardHtml(p){
   const hasSb = !!p.supabase, hasVc = !!p.vercel;
   const sbPaused = hasSb && p.supabase.status !== "ACTIVE_HEALTHY";
   const H = hasSb ? 168 : 96;
   const gh = "var(--gh)", sb = "var(--sb)", vc = "var(--vc)", mut = "var(--text-muted)";
   const vcStroke = hasVc ? vc : mut;
-  const sbStroke = sbPaused ? "var(--sev-ink)" : sb;
+  const sbStroke = sbPaused ? "var(--sev-solid)" : sb;
   const repo = p.github.repo;
   const repoFs = repo.length > 18 ? 10.5 : repo.length > 14 ? 11.5 : 13;
 
@@ -454,23 +559,25 @@ function flowCardHtml(p){
     }
   }
   s += `</svg>`;
-  return `<div class="flow-card">
+  return `<div class="flow-card s-${p.overall}">
     <div class="flow-head"><span class="flow-title">${esc(p.title)}</span>${chip(p.overall)}</div>${s}</div>`;
 }
 
-const noteHtml = (title, badge, body) =>
-  `<div class="note"><div class="nt">${title} ${badge}</div><div class="nd">${body}</div></div>`;
 const emptyHtml = msg => `<div class="empty">${msg}</div>`;
 
 /* ---------------- views ---------------- */
 function buildViews(data){
   const P = data.projects;
-  const needsAction = P.filter(p => p.overall === "serious" || p.overall === "warning");
+  const urgent      = P.filter(p => p.overall === "serious");
+  const later       = P.filter(p => p.overall === "warning");
+  const needsAction = urgent.length + later.length;
   const flowCards   = P.filter(p => p.supabase || p.vercel);
   const unlinked    = P.filter(p => !p.supabase && !p.vercel && !p.otherStack);
   const otherStack  = P.filter(p => p.otherStack);
   const okCount     = P.filter(p => p.overall === "good").length;
   const dbAsleep    = P.filter(p => p.supabase && p.supabase.status !== "ACTIVE_HEALTHY").length;
+
+  const dist = ORDER.map(k => ({ k, n: P.filter(p => p.overall === k).length })).filter(d => d.n > 0);
 
   return [
     {
@@ -487,13 +594,22 @@ function buildViews(data){
             <div class="value">${data.vercelTeam.total}</div><div class="sub">모두 배포 성공</div></div>
           <div class="stat-tile"><div class="label">이번 달 비용</div>
             <div class="value">$${data.supabaseOrg.monthlyCost}</div><div class="sub">전부 무료 플랜</div></div>
-          <div class="stat-tile"><div class="label">손봐야 할 항목</div>
-            <div class="value">${needsAction.length}</div><div class="sub">완전 정상은 ${okCount}개</div></div>
+          <div class="stat-tile${urgent.length ? " flag" : ""}"><div class="label">바로 조치 필요</div>
+            <div class="value">${urgent.length}</div><div class="sub">확인 필요는 ${later.length}개</div></div>
         </div>
-        <div class="panel overview-note">
+
+        <div class="panel health" style="margin-top:14px">
+          <div class="group-head" style="margin-bottom:14px"><span class="gt">프로젝트 ${P.length}개 상태 분포</span><span class="grule"></span></div>
+          <div class="hbar">${dist.map(d =>
+            `<div class="seg" style="flex:${d.n};background:${VERDICT[d.k].color}" title="${VERDICT[d.k].group} ${d.n}개"></div>`).join("")}</div>
+          <div class="hleg">${dist.map(d =>
+            `<span class="hitem"><span class="swatch" style="background:${VERDICT[d.k].color}"></span>${VERDICT[d.k].group} <b>${d.n}</b></span>`).join("")}</div>
+        </div>
+
+        <div class="panel" style="margin-top:14px">
           <div class="ov-line"><span class="ic good">●</span><span><b>${okCount}개</b>가 세 플랫폼 모두 연결되어 정상 운영 중입니다.</span>
             <button class="go" data-goto="matrix">보기 →</button></div>
-          <div class="ov-line"><span class="ic serious">▲</span><span><b>${dbAsleep}개</b>의 Supabase DB가 잠들어 있습니다. 그중 배포까지 살아있는 것은 즉시 확인이 필요합니다.</span>
+          <div class="ov-line"><span class="ic serious">▲</span><span><b>${dbAsleep}개</b>의 Supabase DB가 잠들어 있고, 그중 <b>${urgent.length}개</b>는 배포까지 살아있어 지금 오류가 날 수 있습니다.</span>
             <button class="go" data-goto="actions">보기 →</button></div>
           <div class="ov-line"><span class="ic warning">◆</span><span><b>${unlinked.length}개</b> 저장소는 아직 DB·배포가 연결되지 않았습니다.</span>
             <button class="go" data-goto="unlinked">보기 →</button></div>
@@ -504,25 +620,33 @@ function buildViews(data){
     {
       id: "matrix", label: "연결 현황", count: P.length,
       title: "연결 현황 한눈에 보기",
-      desc: "가로 한 줄이 프로젝트 하나입니다. 각 칸을 보면 그 프로젝트가 어떤 플랫폼을 쓰고 있고 지금 어떤 상태인지 바로 알 수 있습니다. 왼쪽 세로 색 막대는 종합 상태입니다.",
+      desc: "상태별로 묶어서 보여줍니다. 한 줄이 프로젝트 하나이고, 왼쪽 세로 색 막대와 그룹 제목으로 상태를 구분합니다.",
       html: `<div class="panel">${matrixHtml(data)}</div>`
     },
     {
-      id: "actions", label: "손봐야 할 것", count: needsAction.length, alert: needsAction.length > 0,
+      id: "actions", label: "손봐야 할 것", count: needsAction, alert: urgent.length > 0,
       title: "지금 손봐야 할 것",
-      desc: "정상이 아닌 항목만 모아, 무엇을 확인하면 되는지 정리했습니다.",
-      html: `<div class="panel">${
-        needsAction.length ? needsAction.map(p => `
-          <div class="action">
-            <div class="mark ${p.overall === 'serious' ? 'serious' : 'warning'}">${p.overall === 'serious' ? '▲' : '◆'}</div>
-            <div class="atext"><div class="at">${esc(p.title)}</div><div class="ad">${esc(p.note)}</div></div>
-          </div>`).join("") : emptyHtml("손봐야 할 항목이 없습니다. 전부 정상입니다.")
-      }</div>`
+      desc: "급한 것과 나중에 봐도 되는 것을 나눠 놓았습니다. 각 항목 아래 화살표는 무엇을 하면 되는지 알려줍니다.",
+      html: `<div class="panel">
+        ${urgent.length ? `<div class="group">${groupHead("serious", urgent.length, "서비스에 지금 영향이 있습니다")}
+          ${urgent.map(p => `<div class="act-major">
+            <div class="mk">▲</div>
+            <div><div class="t">${esc(p.title)}</div><div class="d">${esc(p.note)}</div>
+            <div class="fix">🔧 ${esc(fixHint(p))}</div></div>
+          </div>`).join("")}</div>` : ""}
+        ${later.length ? `<div class="group">${groupHead("warning", later.length, "급하지 않습니다")}
+          ${later.map(p => `<div class="act-minor">
+            <div class="mk">◆</div>
+            <div><div class="t">${esc(p.title)}</div><div class="d">${esc(p.note)}</div>
+            <div class="fix">${esc(fixHint(p))}</div></div>
+          </div>`).join("")}</div>` : ""}
+        ${!needsAction ? emptyHtml("손봐야 할 항목이 없습니다. 전부 정상입니다.") : ""}
+      </div>`
     },
     {
       id: "flow", label: "배포 흐름", count: flowCards.length,
       title: "배포가 흘러가는 구조",
-      desc: "실제로 플랫폼에 연결된 프로젝트만, 코드가 어디를 거쳐 서비스가 되는지 그렸습니다. 점선은 아직 연결되지 않았거나 멈춰 있는 구간입니다.",
+      desc: "실제로 플랫폼에 연결된 프로젝트만, 코드가 어디를 거쳐 서비스가 되는지 그렸습니다. 카드 위쪽 색 띠가 상태이고, 점선은 아직 연결되지 않았거나 멈춰 있는 구간입니다.",
       html: `<div class="panel"><div class="flow-grid">${
         flowCards.length ? flowCards.map(flowCardHtml).join("") : emptyHtml("플랫폼에 연결된 프로젝트가 아직 없습니다.")
       }</div></div>`
@@ -532,8 +656,12 @@ function buildViews(data){
       title: "아직 플랫폼에 안 붙은 저장소",
       desc: "GitHub에만 있고 DB·배포가 연결되지 않은 저장소입니다. 초기 단계이거나 정리 대상일 수 있습니다.",
       html: `<div class="panel"><div class="note-grid">${
-        unlinked.length ? unlinked.map(p => noteHtml(esc(p.title), chip(p.overall), esc(p.note))).join("")
-                        : emptyHtml("모든 저장소가 플랫폼에 연결되어 있습니다.")
+        unlinked.length ? unlinked.map(p => `<div class="note k-warning">
+            <div class="ic">◆</div>
+            <div><div class="nt">${esc(p.title)}</div>
+            <div class="nm">GitHub · ${esc(p.github.visibility)} · ${esc(p.desc)}</div>
+            <div class="nd">${esc(p.note)}</div></div>
+          </div>`).join("") : emptyHtml("모든 저장소가 플랫폼에 연결되어 있습니다.")
       }</div></div>`
     },
     {
@@ -542,8 +670,12 @@ function buildViews(data){
       desc: "어떤 저장소와 짝인지 이름으로 확인되지 않는 DB입니다. 안 쓰는 것이면 삭제해 정리할 수 있습니다.",
       html: `<div class="panel"><div class="note-grid">${
         data.orphanSupabase.length
-          ? data.orphanSupabase.map(o => noteHtml(esc(o.name), `<span class="verdict warning">◆ 확인 필요</span>`,
-              `${esc(o.region)} · ${esc(o.status)} — ${esc(o.note)}`)).join("")
+          ? data.orphanSupabase.map(o => `<div class="note k-warning">
+              <div class="ic">⚡</div>
+              <div><div class="nt">${esc(o.name)}</div>
+              <div class="nm">${esc(o.region)} · ${esc(o.status)}</div>
+              <div class="nd">${esc(o.note)}</div></div>
+            </div>`).join("")
           : emptyHtml("모든 DB가 저장소와 짝이 맞습니다.")
       }</div></div>`
     },
@@ -553,7 +685,12 @@ function buildViews(data){
       desc: "Supabase·Vercel을 쓰지 않아 위 집계와 별개로 관리되는 프로젝트입니다.",
       html: `<div class="panel"><div class="note-grid">${
         otherStack.length
-          ? otherStack.map(p => noteHtml(esc(p.title), `<span class="verdict neutral">○ ${esc(p.otherStack)}</span>`, esc(p.note))).join("")
+          ? otherStack.map(p => `<div class="note k-neutral">
+              <div class="ic">◇</div>
+              <div><div class="nt">${esc(p.title)}</div>
+              <div class="nm">${esc(p.otherStack)}</div>
+              <div class="nd">${esc(p.note)}</div></div>
+            </div>`).join("")
           : emptyHtml("해당하는 프로젝트가 없습니다.")
       }</div></div>`
     }
@@ -591,7 +728,7 @@ function mount(data){
     nav.querySelectorAll("button").forEach(b => b.setAttribute("aria-current", String(b.dataset.view === id)));
     main.querySelectorAll(".view").forEach(s => s.classList.toggle("is-active", s.id === "view-" + id));
     if (push && location.hash.slice(1) !== id) history.replaceState(null, "", "#" + id);
-    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+    window.scrollTo({ top: 0 });
   }
 
   nav.addEventListener("click", e => {
