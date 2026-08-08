@@ -21,6 +21,7 @@
     --active-ink:     #fcfcfb;
     --gh:             #2a78d6;
     --sb:             #1baf7a;
+    --sb-ink:         #0e7a54;
     --vc:             #4a3aa7;
     --etc:            #898781;
     --ok:             #0ca30c;
@@ -50,6 +51,7 @@
       --active-ink:     #0d0d0d;
       --gh:             #3987e5;
       --sb:             #199e70;
+      --sb-ink:         #46c795;
       --vc:             #9085e9;
       --etc:            #898781;
       --ok:             #0ca30c;
@@ -79,6 +81,7 @@
     --active-ink:     #0d0d0d;
     --gh:             #3987e5;
     --sb:             #199e70;
+    --sb-ink:         #46c795;
     --vc:             #9085e9;
     --etc:            #898781;
     --ok:             #0ca30c;
@@ -270,8 +273,8 @@
   .act-minor .fix { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
   .act-minor .fix::before { content: "→ "; }
 
-  /* ---------- flow ---------- */
-  .flow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 14px; }
+  /* ---------- flow (git graph) ---------- */
+  .flow-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
   .flow-card { background: var(--surface-1); border: 1px solid var(--border);
     border-top: 4px solid var(--rule); border-radius: 12px; padding: 14px 16px 8px; }
   .flow-card.s-good    { border-top-color: var(--ok-solid); }
@@ -280,10 +283,15 @@
   .flow-head { display:flex; align-items:center; justify-content: space-between; gap:10px; margin-bottom: 4px; }
   .flow-title { font-weight: 700; font-size: 14.5px; }
   .flow-card svg { display:block; width: 100%; height: auto; }
-  .nbox { fill: var(--surface-2); stroke: var(--border); }
-  .ntitle { font-size: 13px; font-weight: 650; fill: var(--text-primary); }
-  .nsub { font-size: 11px; fill: var(--text-muted); }
-  .edgelab { font-size: 10.5px; fill: var(--text-muted); }
+  .flow-right { display:flex; align-items:center; gap:8px; }
+  .fb { font-size: 11.5px; font-weight: 650; color: var(--sb); background: color-mix(in srgb, var(--sb) 14%, transparent);
+    border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+  .fb.muted { color: var(--text-muted); background: var(--off-bg); }
+  .gc-t { font-size: 12.5px; font-weight: 650; fill: var(--text-primary); }
+  .gc-s { font-size: 10.5px; fill: var(--text-muted); }
+  .gc-e { font-size: 10.5px; fill: var(--text-muted); }
+  .gc-b { font-size: 12px; font-weight: 650; fill: var(--sb-ink); }
+  .gc-d { font-size: 11px; font-weight: 650; fill: var(--vc); }
 
   /* ---------- notes ---------- */
   .note-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
@@ -317,9 +325,11 @@
     .nav button { width: auto; white-space: nowrap; padding: 8px 13px; }
     .nav .cnt { display: none; }
     .side-foot { margin-top: 10px; padding-top: 12px; }
-    .flow-grid, .note-grid { grid-template-columns: 1fr; }
+    .note-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 720px) {
+    .flow-card { overflow-x: auto; }
+    .flow-card svg { min-width: 540px; }
     .colhead-row { display: none; }
     .row { grid-template-columns: 1fr; gap: 4px; align-items: start; }
     .row > .pcell { margin-bottom: 6px; }
@@ -361,7 +371,8 @@ const DATA = {
       supabase: { name: "real-estate-crm", region: "ap-northeast-2", status: "ACTIVE_HEALTHY" },
       vercel: { name: "real-estate-crm", state: "READY" },
       otherStack: null, overall: "good",
-      note: "세 플랫폼이 모두 연결·정상. 가장 활발히 작업 중인 프로젝트입니다."
+      note: "세 플랫폼이 모두 연결·정상. 가장 활발히 작업 중인 프로젝트입니다.",
+      branches: [{ name: "main", head: "491191f", isDefault: true }],
     },
     {
       key: "admin-agent-crm", title: "admin-agent-crm", desc: "사건/의뢰인 관리 CRM",
@@ -369,57 +380,66 @@ const DATA = {
       supabase: { name: "admin-agent-crm", region: "ap-northeast-2", status: "INACTIVE" },
       vercel: { name: "admin-agent-crm", state: "READY" },
       otherStack: null, overall: "serious",
-      note: "배포된 앱은 살아있지만 연결된 DB가 멈춰 있어, 접속 시 데이터가 안 나올 수 있습니다."
+      note: "배포된 앱은 살아있지만 연결된 DB가 멈춰 있어, 접속 시 데이터가 안 나올 수 있습니다.",
+      branches: [{ name: "main", head: "f584fc3", isDefault: true }],
     },
     {
       key: "english-diary", title: "english-diary", desc: "영어 일기 앱",
       github: { repo: "ENGLISH-DIARY", visibility: "public" },
       supabase: { name: "english-diary", region: "ap-northeast-2", status: "ACTIVE_HEALTHY" },
       vercel: null, otherStack: null, overall: "warning",
-      note: "DB는 정상 가동 중인데 Vercel에 배포 프로젝트가 없습니다. 다른 곳에 배포했는지 확인이 필요합니다."
+      note: "DB는 정상 가동 중인데 Vercel에 배포 프로젝트가 없습니다. 다른 곳에 배포했는지 확인이 필요합니다.",
+      branches: [{ name: "main", head: "1639b02", isDefault: true }, { name: "feature/multi-language", head: "b23efa6" }, { name: "feature/new-features", head: "1639b02" }, { name: "듀오링고-마케팅-벤치마킹", head: "1639b02" }],
     },
     {
       key: "my-dividend-manager", title: "my-dividend-manager", desc: "배당 관리 앱",
       github: { repo: "MY-DIVIDEND-MANAGER", visibility: "public" },
       supabase: { name: "my-dividend-manager", region: "ap-northeast-2", status: "INACTIVE" },
       vercel: null, otherStack: null, overall: "warning",
-      note: "DB가 멈춰 있고 배포처도 없습니다. 현재 중단된 프로젝트인지 확인이 필요합니다."
+      note: "DB가 멈춰 있고 배포처도 없습니다. 현재 중단된 프로젝트인지 확인이 필요합니다.",
+      branches: [{ name: "main", head: "adde776", isDefault: true }],
     },
     {
       key: "nomad-workation", title: "NOMAD-WORKATION", desc: "노마워크 · 채용/워케이션",
       github: { repo: "NOMAD-WORKATION", visibility: "private" },
       supabase: null, vercel: null, otherStack: "Cloudflare Pages + D1", overall: "neutral",
-      note: "Supabase/Vercel이 아닌 Cloudflare 스택으로 별도 운영 중입니다."
+      note: "Supabase/Vercel이 아닌 Cloudflare 스택으로 별도 운영 중입니다.",
+      branches: [{ name: "main", head: "6b337e6", isDefault: true }],
     },
     {
       key: "blog", title: "blog", desc: "블로그 자동화 · 대시보드 템플릿 보관",
       github: { repo: "blog", visibility: "public" },
       supabase: null, vercel: null, otherStack: "Tistory", overall: "neutral",
-      note: "실제 게시는 티스토리에서 이루어져 Supabase/Vercel과 무관합니다. 이 대시보드의 템플릿 파일도 여기 보관됩니다."
+      note: "실제 게시는 티스토리에서 이루어져 Supabase/Vercel과 무관합니다. 이 대시보드의 템플릿 파일도 여기 보관됩니다.",
+      branches: [{ name: "main", head: "875a702", isDefault: true }],
     },
     {
       key: "namawork", title: "namawork", desc: "신규 저장소",
       github: { repo: "namawork", visibility: "public" },
       supabase: null, vercel: null, otherStack: null, overall: "warning",
-      note: "NOMAD-WORKATION과 이름이 비슷해 재작업인지 신규인지 불명확합니다."
+      note: "NOMAD-WORKATION과 이름이 비슷해 재작업인지 신규인지 불명확합니다.",
+      branches: [{ name: "main", head: "7604327", isDefault: true }],
     },
     {
       key: "interest-rate-manager", title: "interest-rate-manager", desc: "신규 저장소",
       github: { repo: "interest-rate-manager", visibility: "public" },
       supabase: null, vercel: null, otherStack: null, overall: "warning",
-      note: "아직 DB·배포가 연결되지 않은 초기 단계로 보입니다."
+      note: "아직 DB·배포가 연결되지 않은 초기 단계로 보입니다.",
+      branches: [{ name: "main", head: "aa97867", isDefault: true }],
     },
     {
       key: "pg-merchant-risk-analyzer", title: "pg-merchant-risk-analyzer", desc: "PG 가맹점 위험도 분석",
       github: { repo: "pg-merchant-risk-analyzer", visibility: "private" },
       supabase: null, vercel: null, otherStack: null, overall: "warning",
-      note: "연결된 DB·배포처를 찾지 못했습니다."
+      note: "연결된 DB·배포처를 찾지 못했습니다.",
+      branches: [{ name: "master", head: "8de7aac", isDefault: true }],
     },
     {
       key: "one-dash", title: "1-", desc: "용도 불명 저장소",
       github: { repo: "1-", visibility: "private" },
       supabase: null, vercel: null, otherStack: null, overall: "warning",
-      note: "이름만으로는 용도를 알 수 없습니다. 테스트용이면 정리해도 좋습니다."
+      note: "이름만으로는 용도를 알 수 없습니다. 테스트용이면 정리해도 좋습니다.",
+      branches: [{ name: "main", head: "5dac8d1", isDefault: true }],
     }
   ],
   orphanSupabase: [
@@ -515,52 +535,126 @@ function matrixHtml(data){
     </div>${header}${groups}`;
 }
 
-/* ---------------- flow ---------------- */
+/* ---------------- flow (git graph) ---------------- */
+const VB_W = 660, X0 = 70, X1 = 590, MAIN_Y = 66, NODE_R = 13, LANE_GAP = 52;
+
+function textW(s, fs){
+  let w = 0;
+  for (const ch of String(s)) {
+    const c = ch.codePointAt(0);
+    if (c >= 0xAC00 && c <= 0xD7A3) w += fs;
+    else if (c > 0x2100) w += fs * 1.15;
+    else if (/[A-Z]/.test(ch)) w += fs * 0.63;
+    else if (/[ilj.,'\-!|]/.test(ch)) w += fs * 0.32;
+    else w += fs * 0.56;
+  }
+  return w;
+}
+function truncToW(s, fs, maxW){
+  s = String(s);
+  if (textW(s, fs) <= maxW) return s;
+  let out = "";
+  for (const ch of s) { if (textW(out + ch + "…", fs) > maxW) break; out += ch; }
+  return out + "…";
+}
+/* 글자가 칩을 넘치면 크기를 한 단계씩 줄이고, 그래도 넘치면 자릅니다 */
+function fitText(s, sizes, maxW){
+  for (const fs of sizes) if (textW(s, fs) <= maxW) return { text: s, fs };
+  const fs = sizes[sizes.length - 1];
+  return { text: truncToW(s, fs, maxW), fs };
+}
+
+function nodeChip(cx, color, title, sub, maxW){
+  const inner = maxW - 22;
+  const t = fitText(title, [12.5, 11.5, 10.5], inner);
+  const s = fitText(sub, [10.5, 9.5], inner);
+  const w = Math.max(96, Math.min(Math.max(textW(t.text, t.fs), textW(s.text, s.fs)) + 22, maxW));
+  let x = Math.max(3, Math.min(cx - w / 2, VB_W - w - 3));
+  const top = 6, h = 38, bot = top + h;
+  return `<g>
+    <rect x="${x}" y="${top}" width="${w}" height="${h}" rx="9" fill="${color}" opacity="0.10"/>
+    <rect x="${x}" y="${top}" width="${w}" height="${h}" rx="9" fill="none" stroke="${color}" stroke-opacity="0.42"/>
+    <path d="M ${cx - 5} ${bot} L ${cx + 5} ${bot} L ${cx} ${bot + 7} Z" fill="${color}" fill-opacity="0.42"/>
+    <text class="gc-t" x="${x + w / 2}" y="${top + 16}" text-anchor="middle" style="font-size:${t.fs}px">${esc(t.text)}</text>
+    <text class="gc-s" x="${x + w / 2}" y="${top + 30}" text-anchor="middle" style="font-size:${s.fs}px">${esc(s.text)}</text>
+  </g>`;
+}
+
 function flowCardHtml(p){
   const hasSb = !!p.supabase, hasVc = !!p.vercel;
   const sbPaused = hasSb && p.supabase.status !== "ACTIVE_HEALTHY";
-  const H = hasSb ? 168 : 96;
-  const gh = "var(--gh)", sb = "var(--sb)", vc = "var(--vc)", mut = "var(--text-muted)";
-  const vcStroke = hasVc ? vc : mut;
-  const sbStroke = sbPaused ? "var(--sev-solid)" : sb;
-  const repo = p.github.repo;
-  const repoFs = repo.length > 18 ? 10.5 : repo.length > 14 ? 11.5 : 13;
+  const MAIN = "var(--vc)", BR = "var(--sb)", MUT = "var(--text-muted)", ALERT = "var(--sev-solid)";
 
-  let s = `<svg viewBox="0 0 520 ${H}" xmlns="http://www.w3.org/2000/svg" role="img">
-  <defs>
-    <marker id="a-gh-${p.key}" markerWidth="7" markerHeight="7" refX="5.5" refY="2.75" orient="auto"><path d="M0,0 L5.5,2.75 L0,5.5 Z" fill="${gh}"/></marker>
-    <marker id="a-vc-${p.key}" markerWidth="7" markerHeight="7" refX="5.5" refY="2.75" orient="auto"><path d="M0,0 L5.5,2.75 L0,5.5 Z" fill="${vcStroke}"/></marker>
-    <marker id="a-sb-${p.key}" markerWidth="7" markerHeight="7" refX="5.5" refY="2.75" orient="auto"><path d="M0,0 L5.5,2.75 L0,5.5 Z" fill="${sbStroke}"/></marker>
-  </defs>
-  <rect x="2" y="16" width="104" height="46" rx="9" class="nbox" stroke-width="1.5"/>
-  <text class="ntitle" x="54" y="37" text-anchor="middle">💻 내 코드</text>
-  <text class="nsub" x="54" y="52" text-anchor="middle">git push</text>
-  <line x1="108" y1="39" x2="160" y2="39" stroke="${gh}" stroke-width="2" marker-end="url(#a-gh-${p.key})"/>
-  <rect x="166" y="16" width="164" height="46" rx="9" class="nbox" stroke="${gh}" stroke-width="2"/>
-  <text class="ntitle" x="248" y="37" text-anchor="middle" style="font-size:${repoFs}px">🐙 ${esc(repo)}</text>
-  <text class="nsub" x="248" y="52" text-anchor="middle">GitHub · ${esc(p.github.visibility)}</text>
-  <line x1="332" y1="39" x2="388" y2="39" stroke="${vcStroke}" stroke-width="2" stroke-dasharray="${hasVc ? "none" : "5,4"}" marker-end="url(#a-vc-${p.key})"/>
-  <text class="edgelab" x="360" y="30" text-anchor="middle">${hasVc ? "자동 배포" : "미연결"}</text>
-  <rect x="394" y="16" width="124" height="46" rx="9" class="nbox" stroke="${vcStroke}" stroke-width="2" stroke-dasharray="${hasVc ? "none" : "5,4"}"/>
-  <text class="ntitle" x="456" y="37" text-anchor="middle">${hasVc ? "▲ Vercel" : "▲ 없음"}</text>
-  <text class="nsub" x="456" y="52" text-anchor="middle">${hasVc ? "배포 완료" : "확인 필요"}</text>`;
+  const branches = p.branches || [];
+  const def = branches.find(b => b.isDefault) || branches[0] || { name: "main", head: "" };
+  const side = branches.filter(b => b !== def);
 
-  if (hasSb) {
-    s += `
-  <line x1="248" y1="64" x2="248" y2="104" stroke="${sbStroke}" stroke-width="2" stroke-dasharray="${sbPaused ? "5,4" : "none"}" marker-end="url(#a-sb-${p.key})"/>
-  <text class="edgelab" x="258" y="88" text-anchor="start">데이터 연결</text>
-  <rect x="166" y="110" width="164" height="46" rx="9" class="nbox" stroke="${sbStroke}" stroke-width="2" stroke-dasharray="${sbPaused ? "5,4" : "none"}"/>
-  <text class="ntitle" x="248" y="131" text-anchor="middle">⚡ Supabase DB</text>
-  <text class="nsub" x="248" y="146" text-anchor="middle">${sbPaused ? "일시정지 — 깨우기 필요" : "정상 가동 중"}</text>`;
-    if (hasVc) {
-      s += `
-  <path d="M 394 39 L 366 39 L 366 133 L 336 133" fill="none" stroke="${sbStroke}" stroke-width="1.5" stroke-dasharray="2,4" opacity="0.6"/>
-  <text class="edgelab" x="400" y="137" text-anchor="start">앱이 DB를 조회</text>`;
-    }
+  const nodes = [
+    { title: "💻 내 코드", sub: "git push", color: MAIN },
+    { title: p.github.repo, sub: `GitHub · ${p.github.visibility} · ${def.name}`, color: MAIN },
+    hasVc ? { title: "▲ Vercel", sub: "배포 완료", color: MAIN }
+          : { title: "▲ Vercel 없음", sub: "배포 확인 필요", color: MUT, muted: true }
+  ];
+  if (hasSb) nodes.push({
+    title: "⚡ Supabase DB",
+    sub: sbPaused ? "일시정지 — 깨우기 필요" : "정상 가동 중",
+    color: sbPaused ? ALERT : MAIN, alert: sbPaused
+  });
+
+  const k = nodes.length;
+  const gap = (X1 - X0) / (k - 1);
+  const xs = nodes.map((_, i) => X0 + i * gap);
+  const chipMax = Math.min(196, gap - 10);
+  const H = side.length ? MAIN_Y + 58 + (side.length - 1) * LANE_GAP + 32 : MAIN_Y + 38;
+
+  let s = `<svg viewBox="0 0 ${VB_W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img">`;
+
+  for (let i = 0; i < k - 1; i++) {
+    const isData = hasSb && i === k - 2, isDeploy = (i === 1 && !isData);
+    const dashed = (isDeploy && !hasVc) || isData;
+    const col = isData ? (sbPaused ? ALERT : MAIN) : (isDeploy && !hasVc ? MUT : MAIN);
+    const label = isData ? "데이터 연결" : (i === 0 ? "푸시" : (hasVc ? "자동 배포" : "미연결"));
+    s += `<line x1="${xs[i] + NODE_R}" y1="${MAIN_Y}" x2="${xs[i + 1] - NODE_R}" y2="${MAIN_Y}"
+      stroke="${col}" stroke-width="2.5" ${dashed ? 'stroke-dasharray="5,4"' : ""}/>
+      <text class="gc-e" x="${(xs[i] + xs[i + 1]) / 2}" y="${MAIN_Y + 18}" text-anchor="middle">${label}</text>`;
   }
+
+  side.forEach((b, i) => {
+    const laneY = MAIN_Y + 58 + i * LANE_GAP;
+    const bx = xs[1] + 82;
+    const same = def.head && b.head === def.head;
+    const op = same ? 0.6 : 1;
+    s += `<path d="M ${xs[1]} ${MAIN_Y + NODE_R} C ${xs[1]} ${laneY - 22}, ${xs[1] + 18} ${laneY}, ${xs[1] + 50} ${laneY} L ${bx - NODE_R - 2} ${laneY}"
+      fill="none" stroke="${BR}" stroke-width="2.5" opacity="${op}" ${same ? 'stroke-dasharray="5,4"' : ""}/>
+      <circle cx="${bx}" cy="${laneY}" r="${NODE_R - 2}" fill="${BR}" opacity="${op}"/>`;
+
+    const st = same ? "main과 같은 위치" : "따로 작업 중";
+    const stW = textW(st, 10.5);
+    const cx0 = bx + NODE_R + 10;
+    const room = VB_W - cx0 - stW - 22;
+    const nm = fitText(b.name, [12, 11], Math.max(70, room));
+    const cw = textW(nm.text, nm.fs) + 20;
+    s += `<rect x="${cx0}" y="${laneY - 12}" width="${cw}" height="24" rx="7" fill="${BR}" opacity="0.16"/>
+      <text class="gc-b" x="${cx0 + cw / 2}" y="${laneY + 4}" text-anchor="middle" style="font-size:${nm.fs}px">${esc(nm.text)}</text>
+      <text class="gc-e" x="${cx0 + cw + 9}" y="${laneY + 4}">${st}</text>`;
+  });
+
+  nodes.forEach((n, i) => {
+    s += nodeChip(xs[i], n.color, n.title, n.sub, chipMax);
+    s += n.muted
+      ? `<circle cx="${xs[i]}" cy="${MAIN_Y}" r="${NODE_R - 1}" fill="var(--surface-1)" stroke="${MUT}" stroke-width="2.5" stroke-dasharray="4,3"/>`
+      : `<circle cx="${xs[i]}" cy="${MAIN_Y}" r="${NODE_R}" fill="${n.color}"/>`;
+  });
+
   s += `</svg>`;
+
+  const brNote = side.length
+    ? `<span class="fb">브랜치 ${branches.length}개</span>`
+    : `<span class="fb muted">브랜치 ${def.name} 하나</span>`;
+
   return `<div class="flow-card s-${p.overall}">
-    <div class="flow-head"><span class="flow-title">${esc(p.title)}</span>${chip(p.overall)}</div>${s}</div>`;
+    <div class="flow-head"><span class="flow-title">${esc(p.title)}</span>
+      <span class="flow-right">${brNote}${chip(p.overall)}</span></div>${s}</div>`;
 }
 
 const emptyHtml = msg => `<div class="empty">${msg}</div>`;
@@ -576,6 +670,7 @@ function buildViews(data){
   const otherStack  = P.filter(p => p.otherStack);
   const okCount     = P.filter(p => p.overall === "good").length;
   const dbAsleep    = P.filter(p => p.supabase && p.supabase.status !== "ACTIVE_HEALTHY").length;
+  const totalBranches = P.reduce((n, p) => n + ((p.branches || []).length || 1), 0);
 
   const dist = ORDER.map(k => ({ k, n: P.filter(p => p.overall === k).length })).filter(d => d.n > 0);
 
@@ -587,7 +682,7 @@ function buildViews(data){
       html: `
         <div class="stat-row">
           <div class="stat-tile"><div class="label"><span class="swatch" style="background:var(--gh)"></span>GitHub 저장소</div>
-            <div class="value">${data.github.total}</div><div class="sub">공개 ${data.github.publicCount} · 비공개 ${data.github.privateCount}</div></div>
+            <div class="value">${data.github.total}</div><div class="sub">브랜치 합계 ${totalBranches}개</div></div>
           <div class="stat-tile"><div class="label"><span class="swatch" style="background:var(--sb)"></span>Supabase DB</div>
             <div class="value">${data.supabaseOrg.total}</div><div class="sub">가동 ${data.supabaseOrg.active} · 정지 ${data.supabaseOrg.inactive}</div></div>
           <div class="stat-tile"><div class="label"><span class="swatch" style="background:var(--vc)"></span>Vercel 배포</div>
@@ -646,7 +741,7 @@ function buildViews(data){
     {
       id: "flow", label: "배포 흐름", count: flowCards.length,
       title: "배포가 흘러가는 구조",
-      desc: "실제로 플랫폼에 연결된 프로젝트만, 코드가 어디를 거쳐 서비스가 되는지 그렸습니다. 카드 위쪽 색 띠가 상태이고, 점선은 아직 연결되지 않았거나 멈춰 있는 구간입니다.",
+      desc: "코드가 어디를 거쳐 서비스가 되는지 깃 그래프로 그렸습니다. 보라색이 기본 브랜치 줄기, 초록색이 갈라져 나온 브랜치입니다. 점선은 아직 연결되지 않았거나, 기본 브랜치와 같은 위치라 아직 작업이 없다는 뜻입니다.",
       html: `<div class="panel"><div class="flow-grid">${
         flowCards.length ? flowCards.map(flowCardHtml).join("") : emptyHtml("플랫폼에 연결된 프로젝트가 아직 없습니다.")
       }</div></div>`
@@ -659,7 +754,7 @@ function buildViews(data){
         unlinked.length ? unlinked.map(p => `<div class="note k-warning">
             <div class="ic">◆</div>
             <div><div class="nt">${esc(p.title)}</div>
-            <div class="nm">GitHub · ${esc(p.github.visibility)} · ${esc(p.desc)}</div>
+            <div class="nm">GitHub · ${esc(p.github.visibility)} · 브랜치 ${(p.branches || []).length || 1}개</div>
             <div class="nd">${esc(p.note)}</div></div>
           </div>`).join("") : emptyHtml("모든 저장소가 플랫폼에 연결되어 있습니다.")
       }</div></div>`
